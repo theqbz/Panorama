@@ -50,16 +50,12 @@ def warp(img1,img2,H):
 
     translation_dist=[-x_min,-y_min]
 
-    H_translation=np.array([[1,0,translation_dist[0]],[1,0,translation_dist[1]],[0,0,1]])
+    H_translation=np.array([[1,0,translation_dist[0]],[0,1,translation_dist[1]],[0,0,1]])
 
     imgToReturn=cv2.warpPerspective(img2,H_translation.dot(H),(x_max-x_min,y_max-y_min))
     imgToReturn[translation_dist[1]:r1+translation_dist[1],translation_dist[0]:c1+translation_dist[0]]=img1
 
     return imgToReturn
-
-
-
-
 
 
 # Kepek betoltese
