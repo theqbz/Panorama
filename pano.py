@@ -38,6 +38,7 @@ def draw_matctes(img1, img2, keyP1, keyP2, commonPts):
 # transzformacio
 
 def warp(img1, img2, H):
+    # szelessegi es magassagi adatok
     r1, c1 = img1.shape[:2]
     r2, c2 = img2.shape[:2]
 
@@ -78,8 +79,8 @@ cv2.imshow("2 szurke", resized(img2_gray, 1))
 # Kulcspontok keresese es leiro keszitese
 
 orb = cv2.ORB_create(nfeatures=2000)
-keyPts1, descriptors1 = orb.detectAndCompute(img1, None)
-keyPts2, descriptors2 = orb.detectAndCompute(img2, None)
+keyPts1, descriptors1 = orb.detectAndCompute(img1_gray, None)
+keyPts2, descriptors2 = orb.detectAndCompute(img2_gray, None)
 
 # Kulcspontok kepre rajzolasa
 
@@ -91,7 +92,7 @@ img2_keypts = cv2.drawKeypoints(img2, keyPts2, None, (255, 0, 255))
 cv2.imshow("1 kulcspontok", resized(img1_keypts, 1))
 cv2.imshow("2 kulcspontok", resized(img2_keypts, 1))
 
-# Leirok osszehasonlitasa
+# Kulcspontok osszehasonlitasa és párosítása
 
 bfm = cv2.BFMatcher_create(cv2.NORM_HAMMING)
 commonPts = bfm.knnMatch(descriptors1, descriptors2, k=2)
@@ -128,7 +129,7 @@ for m, n in commonPts:
 img1_bestCommPts = cv2.drawKeypoints(img1, [keyPts1[m.queryIdx] for m in bestPts], None, (255, 0, 255))
 img2_bestCommPts = cv2.drawKeypoints(img2, [keyPts2[m.queryIdx] for m in bestPts], None, (255, 0, 255))
 
-# Legjobb egyezesek megmutatasa
+# Legjobb egyezesek megmutatasa (kulon kepen)
 
 cv2.imshow("Legjobb kulcspontok1", img1_bestCommPts)
 cv2.imshow("Legjobb kulcspontok2", img2_bestCommPts)
@@ -138,18 +139,20 @@ cv2.imshow("Legjobb kulcspontok2", img2_bestCommPts)
 img4 = draw_matctes(img1_gray, img2_gray, keyPts1, keyPts2, bestPts)
 cv2.imshow("osszekottetesek2", img4)
 
-# Homography
-
 MinMatchCount = 10
+
+# Ha legalább 10 egyező pontot talált akkor torzítás majd összefűzés
 
 if len(bestPts) > MinMatchCount:
     scr_pts = np.float32([keyPts1[m.queryIdx].pt for m in bestPts]).reshape(-1, 1, 2)
     dst_pts = np.float32([keyPts2[m.trainIdx].pt for m in bestPts]).reshape(-1, 1, 2)
 
-    M, _ = cv2.findHomography(scr_pts, dst_pts, cv2.RANSAC, 5.0)
-
-    result = warp(img2, img1, M)
+    H, m = cv2.findHomography(scr_pts, dst_pts, cv2.RANSAC, 5.0)
+    result = warp(img2, img1, H)
 
     cv2.imshow("eredmeny", resized(result, 0.6))
+
+else:
+    print("Nem talalhato elegendo egyezo keppont a ket kepen.")
 
 cv2.waitKey(0)
