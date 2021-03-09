@@ -27,7 +27,7 @@ Az első lépésben, a két képen külön-külön megtalált *jellemző képpon
 Ez a folyamat a pontokat párosító obijektum létrehozásával kezdődik, amihez a `BFMatcher_create()` konstruktort kell meghívni. Mivel a kulcspontokat és leírásukat az ORB detektorral készítettük, ezért a párosító működését a `NORM_HAMMING` paraméterrel kell beállítani.
 A pontok párosítását végül a `.knnMatch()` függvény végzi el, amelyben a `k` paraméterrel megadott értékkel lehet maximalizálni, hogy az egyik kép egy-egy kulcspontjához hány kulcspontot párosítson a másik képről.
 
-Az így megtalált kulcspontok közül ki kell választani azokat, amelyek egy bizonyos távolságnál közelebb vannak egymáshoz. A megfelelően közeli kulcspontok az alábbi ciklussal szelektálódnak ki:
+Az így megtalált kulcspontok közül ki kell választani azokat, amelyek egy bizonyos távolságnál közelebb vannak egymáshoz. A megfelelően közeli kulcspontok az alábbi ciklussal szelektálódnak ki - ez a Lowe teszt:
 
 ```python
 bestPts = []
