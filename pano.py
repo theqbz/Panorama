@@ -66,9 +66,42 @@ def warp(img1, img2, H):
 img1 = cv2.imread('kepek/pan1s.jpg')
 img2 = cv2.imread('kepek/pan2s.jpg')
 
+
+# ZAJ
+
+mean = 1
+var = 100
+sigma = var ** 0.9
+gaussian0 = np.random.normal(mean, sigma, img1.shape[:2])  # np.zeros((224, 224), np.float32)
+gaussian1 = np.random.normal(mean, sigma, img1.shape[:2])  # np.zeros((224, 224), np.float32)
+gaussian2 = np.random.normal(mean, sigma, img1.shape[:2])  # np.zeros((224, 224), np.float32)
+
+noisy_image = np.zeros(img1.shape, np.float32)
+
+if len(img1.shape) == 2:
+    noisy_image = img1 + gaussian0
+else:
+    noisy_image[:, :, 0] = img1[:, :, 0] + gaussian0
+    noisy_image[:, :, 2] = img1[:, :, 2] + gaussian1
+    noisy_image[:, :, 1] = img1[:, :, 1] + gaussian2
+
+cv2.normalize(noisy_image, noisy_image, 0, 255, cv2.NORM_MINMAX, dtype=-1)
+noisy_image = noisy_image.astype(np.uint8)
+
+cv2.imshow("img", img1)
+cv2.imshow("gaussian0", gaussian0)
+cv2.imshow("gaussian1", gaussian1)
+cv2.imshow("gaussian2", gaussian2)
+cv2.imshow("noisy", noisy_image)
+
+cv2.waitKey(0)
+
+# ZAJ VEGE
+
+
 # Szurkearnyalat
 
-img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+img1_gray = cv2.cvtColor(noisy_image, cv2.COLOR_BGR2GRAY)
 img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
 # Szurke kepek megmutatasa
@@ -84,7 +117,7 @@ keyPts2, descriptors2 = orb.detectAndCompute(img2_gray, None)
 
 # Kulcspontok kepre rajzolasa
 
-img1_keypts = cv2.drawKeypoints(img1, keyPts1, None, (255, 0, 255))
+img1_keypts = cv2.drawKeypoints(noisy_image, keyPts1, None, (255, 0, 255))
 img2_keypts = cv2.drawKeypoints(img2, keyPts2, None, (255, 0, 255))
 
 # Kulcspontos kepek megmutatasa
@@ -126,7 +159,7 @@ for m, n in commonPts:
 
 # Legjobb egyezesek kepre rajzolasa
 
-img1_bestCommPts = cv2.drawKeypoints(img1, [keyPts1[m.queryIdx] for m in bestPts], None, (255, 0, 255))
+img1_bestCommPts = cv2.drawKeypoints(noisy_image, [keyPts1[m.queryIdx] for m in bestPts], None, (255, 0, 255))
 img2_bestCommPts = cv2.drawKeypoints(img2, [keyPts2[m.queryIdx] for m in bestPts], None, (255, 0, 255))
 
 # Legjobb egyezesek megmutatasa (kulon kepen)
@@ -148,9 +181,9 @@ if len(bestPts) > MinMatchCount:
     dst_pts = np.float32([keyPts2[m.trainIdx].pt for m in bestPts]).reshape(-1, 1, 2)
 
     H, m = cv2.findHomography(scr_pts, dst_pts, cv2.RANSAC, 5.0)
-    result = warp(img2, img1, H)
+    result = warp(img2, noisy_image, H)
 
-    cv2.imshow("eredmeny", resized(result, 0.6))
+    cv2.imshow("eredmeny", resized(result, 0.5))
 
 else:
     print("Nem talalhato elegendo egyezo keppont a ket kepen.")
