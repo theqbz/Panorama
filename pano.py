@@ -54,7 +54,7 @@ def warp(img1, img2, H):
 
     translation_dist = [-x_min, -y_min]
 
-    # 3×3-as transzformacios matrix
+    # 3*3-as transzformacios matrix
     H_translation = np.array([[1, 0, translation_dist[0]], [0, 1, translation_dist[1]], [0, 0, 1]])
 
     # A masodik kep torzitasa majd az eelso beillesztese
